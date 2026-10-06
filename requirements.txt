@@ -1,0 +1,8 @@
+﻿# PDF-Master — Dependencias
+PyQt6>=6.6.0
+PyMuPDF>=1.23.0
+pikepdf>=8.0.0
+Pillow>=10.0.0
+img2pdf>=0.4.4
+reportlab>=4.0.0
+PyInstaller>=6.0.0

@@ -1,0 +1,63 @@
+('D:\\Desarrollo Software\\PDF-Master\\build\\PDF Master\\PDF Master.pkg',
+ {'BINARY': True,
+  'DATA': True,
+  'EXECUTABLE': True,
+  'EXTENSION': True,
+  'PYMODULE': True,
+  'PYSOURCE': True,
+  'PYZ': False,
+  'SPLASH': True,
+  'SYMLINK': False},
+ [('pyi-contents-directory _internal', '', 'OPTION'),
+  ('PYZ-00.pyz',
+   'D:\\Desarrollo Software\\PDF-Master\\build\\PDF Master\\PYZ-00.pyz',
+   'PYZ'),
+  ('struct',
+   'D:\\Desarrollo Software\\PDF-Master\\build\\PDF '
+   'Master\\localpycs\\struct.pyc',
+   'PYMODULE'),
+  ('pyimod01_archive',
+   'D:\\Desarrollo Software\\PDF-Master\\build\\PDF '
+   'Master\\localpycs\\pyimod01_archive.pyc',
+   'PYMODULE'),
+  ('pyimod02_importers',
+   'D:\\Desarrollo Software\\PDF-Master\\build\\PDF '
+   'Master\\localpycs\\pyimod02_importers.pyc',
+   'PYMODULE'),
+  ('pyimod03_ctypes',
+   'D:\\Desarrollo Software\\PDF-Master\\build\\PDF '
+   'Master\\localpycs\\pyimod03_ctypes.pyc',
+   'PYMODULE'),
+  ('pyimod04_pywin32',
+   'D:\\Desarrollo Software\\PDF-Master\\build\\PDF '
+   'Master\\localpycs\\pyimod04_pywin32.pyc',
+   'PYMODULE'),
+  ('pyiboot01_bootstrap',
+   'D:\\Desarrollo '
+   'Software\\PDF-Master\\venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'PYSOURCE'),
+  ('pyi_rth_inspect',
+   'D:\\Desarrollo '
+   'Software\\PDF-Master\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'PYSOURCE'),
+  ('pyi_rth_pkgutil',
+   'D:\\Desarrollo '
+   'Software\\PDF-Master\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
+   'PYSOURCE'),
+  ('pyi_rth_multiprocessing',
+   'D:\\Desarrollo '
+   'Software\\PDF-Master\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
+   'PYSOURCE'),
+  ('pyi_rth_pyqt6',
+   'D:\\Desarrollo '
+   'Software\\PDF-Master\\venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pyqt6.py',
+   'PYSOURCE'),
+  ('main', 'D:\\Desarrollo Software\\PDF-Master\\main.py', 'PYSOURCE-1')],
+ 'python312.dll',
+ True,
+ False,
+ False,
+ [],
+ None,
+ None,
+ None)

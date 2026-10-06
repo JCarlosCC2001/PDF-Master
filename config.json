@@ -1,0 +1,12 @@
+{
+  "color_mode": "original",
+  "page_size": "A4",
+  "orientation": "portrait",
+  "image_quality": 80,
+  "output_folder": "",
+  "language": "es",
+  "custom_width_mm": 210,
+  "custom_height_mm": 297,
+  "dpi": 150,
+  "image_format": "PNG"
+}
