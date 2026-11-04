@@ -4,9 +4,21 @@ Gestiona la configuración persistente de PDF Master en config.json.
 """
 import json
 import os
+import shutil
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+LEGACY_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+APP_DATA_DIR = os.path.join(os.getenv("APPDATA", os.path.expanduser("~")), "PDF Master")
+CONFIG_PATH = os.path.join(APP_DATA_DIR, "config.json")
+
+# Migrar configuración anterior si existe
+if os.path.exists(LEGACY_CONFIG_PATH) and not os.path.exists(CONFIG_PATH):
+    os.makedirs(APP_DATA_DIR, exist_ok=True)
+    try:
+        shutil.copy(LEGACY_CONFIG_PATH, CONFIG_PATH)
+            except OSError:
+        pass
 
 DEFAULTS = {
     "color_mode": "original",          # original | grayscale | blackwhite
@@ -19,6 +31,9 @@ DEFAULTS = {
     "custom_height_mm": 297,
     "dpi": 150,                        # DPI para PDF→Imágenes
     "image_format": "PNG",             # PNG | JPG | TIFF
+    "check_updates": True,             # buscar actualizaciones al iniciar
+    "last_update_check": 0,            # timestamp de la última comprobación
+    "skipped_version": "",             # versión que el usuario decidió omitir
 }
 
 
@@ -46,6 +61,7 @@ class ConfigManager:
     def save(self) -> None:
         """Persiste la configuración actual en disco."""
         try:
+            os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
             with open(CONFIG_PATH, "w", encoding="utf-8") as f:
                 json.dump(self._config, f, indent=2, ensure_ascii=False)
         except OSError:

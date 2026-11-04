@@ -489,7 +489,10 @@ class ReorderPanel(QWidget):
         self._progress.setValue(100)
         self._save_btn.setEnabled(True)
         self._status_lbl.setText(f"Guardado: {os.path.basename(path)}")
-        QMessageBox.information(self, "Listo", f"PDF guardado:\n{path}")
+        from ui.components.toast import show_toast
+        from ui.components.preview_dialog import open_preview
+        show_toast(self, path, "success", title="PDF guardado",
+                   action_text="Ver PDF", action=lambda p=path: open_preview(p, self))
 
     def _on_error(self, msg: str) -> None:
         self._progress.hide()

@@ -144,6 +144,14 @@ class Sidebar(QWidget):
         self._buttons["settings"] = cfg
         layout.addWidget(cfg)
 
+        # Version label
+        from version import __version__
+        v_lbl = QLabel(f"v{__version__}")
+        v_lbl.setFont(QFont("Segoe UI", 8))
+        v_lbl.setStyleSheet(f"color: #666666; background: transparent; padding-top: 8px;")
+        v_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(v_lbl)
+
         self.set_active_page("home")
 
     def _sep(self) -> QFrame:

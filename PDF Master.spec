@@ -1,4 +1,4 @@
-﻿# -*- mode: python ; coding: utf-8 -*-
+# -*- mode: python ; coding: utf-8 -*-
 # PDF Master.spec
 # ---------------
 # Archivo de configuracion de PyInstaller para PDF Master.
@@ -26,6 +26,7 @@ hiddenimports = [
     "PyQt6.QtGui",
     "PyQt6.QtWidgets",
     "PyQt6.QtPrintSupport",
+    "PyQt6.QtNetwork",
     "pymupdf",
     "fitz",
     "pikepdf",
@@ -72,7 +73,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=str(ROOT / "assets" / "icon.ico"),
-    version_file=None,
+    version_file="version_info.txt",
 )
 
 coll = COLLECT(

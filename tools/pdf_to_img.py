@@ -110,7 +110,6 @@ def get_pdf_info(pdf_path: str) -> dict:
 
 
 def suggest_output_dir(pdf_path: str) -> str:
-    """Sugiere carpeta de salida junto al PDF original."""
-    base = os.path.splitext(os.path.basename(pdf_path))[0]
-    folder = os.path.dirname(pdf_path)
-    return os.path.join(folder, f"{base}_imagenes")
+    """Sugiere la misma carpeta del PDF original (sin crear subcarpeta).
+    Los nombres ya incluyen el PDF y la pagina: <nombre>_pagina_01.png"""
+    return os.path.dirname(os.path.abspath(pdf_path))

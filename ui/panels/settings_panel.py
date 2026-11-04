@@ -5,7 +5,7 @@ Panel de configuración global de PDF Master.
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
     QPushButton, QSlider, QFrame, QLineEdit, QFileDialog,
-    QButtonGroup, QRadioButton, QScrollArea, QGroupBox
+    QButtonGroup, QRadioButton, QScrollArea, QGroupBox, QCheckBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
@@ -74,6 +74,7 @@ class SettingsPanel(QWidget):
         body_layout.addWidget(self._card_page_size())
         body_layout.addWidget(self._card_quality())
         body_layout.addWidget(self._card_output_folder())
+        body_layout.addWidget(self._card_updates())
         body_layout.addWidget(self._card_reset())
 
         scroll.setWidget(body)
@@ -243,6 +244,55 @@ class SettingsPanel(QWidget):
         row.addWidget(self._folder_edit)
         row.addWidget(browse_btn)
         layout.addLayout(row)
+        return box
+
+    def _card_updates(self) -> QWidget:
+        from version import __version__
+        from utils.updater import updater
+        box, layout = self._card("🔄  Actualizaciones")
+
+        ver = QLabel(f"Versión instalada: <b>{__version__}</b>")
+        ver.setFont(QFont("Segoe UI", 10))
+        ver.setStyleSheet(f"color: {CLR_TITLE}; background: transparent;")
+        layout.addWidget(ver)
+
+        chk = QCheckBox("Buscar actualizaciones al iniciar")
+        chk.setFont(QFont("Segoe UI", 10))
+        chk.setStyleSheet(f"color: {CLR_TITLE}; background: transparent;")
+        chk.setChecked(bool(config.get("check_updates", True)))
+        chk.toggled.connect(lambda v: config.set("check_updates", bool(v)))
+        layout.addWidget(chk)
+
+        row = QHBoxLayout()
+        self._upd_btn = QPushButton("Buscar ahora")
+        self._upd_btn.setFixedHeight(32)
+        self._upd_btn.setFont(QFont("Segoe UI", 9))
+        self._upd_btn.setStyleSheet(f"""
+            QPushButton {{ background-color: {CLR_RED}; color: white; border: none;
+                           border-radius: 6px; padding: 0 16px; }}
+            QPushButton:hover {{ background-color: #B52020; }}
+            QPushButton:disabled {{ background-color: #CCCCCC; }}
+        """)
+        self._upd_status = QLabel("")
+        self._upd_status.setFont(QFont("Segoe UI", 9))
+        self._upd_status.setStyleSheet(f"color: {CLR_MUTED}; background: transparent;")
+        row.addWidget(self._upd_btn)
+        row.addWidget(self._upd_status, 1)
+        layout.addLayout(row)
+
+        def _check():
+            self._upd_btn.setEnabled(False)
+            self._upd_status.setText("Buscando…")
+            updater.check_for_updates(force=True)
+
+        def _done(text: str):
+            self._upd_btn.setEnabled(True)
+            self._upd_status.setText(text)
+
+        self._upd_btn.clicked.connect(_check)
+        updater.no_update.connect(lambda: _done("✓ Tienes la versión más reciente."))
+        updater.check_failed.connect(lambda m: _done("No se pudo comprobar (¿sin conexión?)."))
+        updater.update_available.connect(lambda v, *_: _done(f"Nueva versión {v} disponible."))
         return box
 
     def _card_reset(self) -> QWidget:

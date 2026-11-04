@@ -338,6 +338,14 @@ class RepairPanel(QWidget):
 
         self._report_box.setPlainText(report)
 
+        from ui.components.toast import show_toast
+        if result["success"]:
+            show_toast(self, f"{result['pages']} páginas · {result['file_size_repaired_mb']:.2f} MB",
+                       "success", title="PDF reparado")
+        else:
+            show_toast(self, result["message"][:140], "error", title="No se pudo reparar",
+                       duration_ms=7000)
+
         if result["success"]:
             self._report_box.setStyleSheet(f"""
                 QTextEdit {{ background: white; border: 2px solid {GREEN};

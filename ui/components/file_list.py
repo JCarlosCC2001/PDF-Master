@@ -67,6 +67,8 @@ class FileListWidget(QWidget):
                 background-color: #FAFAFA;
             }}
         """)
+        self._list.setToolTip("Doble clic para ver la vista previa")
+        self._list.itemDoubleClicked.connect(lambda _it: self._preview_selected())
         layout.addWidget(self._list)
 
         # ── Contador ──────────────────────────────────────────────────────────
@@ -79,12 +81,13 @@ class FileListWidget(QWidget):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(6)
 
+        self._btn_view   = self._make_btn("Ver",       self._preview_selected)
         self._btn_up     = self._make_btn("Subir",     self._move_up)
         self._btn_down   = self._make_btn("Bajar",     self._move_down)
         self._btn_remove = self._make_btn("Quitar",    self._remove_selected, danger=True)
         self._btn_clear  = self._make_btn("Limpiar",   self._clear_all, danger=True)
 
-        for btn in (self._btn_up, self._btn_down, self._btn_remove, self._btn_clear):
+        for btn in (self._btn_view, self._btn_up, self._btn_down, self._btn_remove, self._btn_clear):
             btn_row.addWidget(btn)
 
         layout.addLayout(btn_row)
@@ -148,6 +151,14 @@ class FileListWidget(QWidget):
         item = QListWidgetItem(label)
         item.setData(Qt.ItemDataRole.UserRole, path)
         return item
+
+    def _preview_selected(self) -> None:
+        row = self._list.currentRow()
+        if row < 0 and self._paths:
+            row = 0
+        if 0 <= row < len(self._paths):
+            from ui.components.preview_dialog import open_preview
+            open_preview(self._paths[row], self)
 
     def _move_up(self) -> None:
         row = self._list.currentRow()

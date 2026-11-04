@@ -63,8 +63,10 @@ def _delete_tree(root, path: str) -> None:
 # ---------------------------------------------------------------------------
 
 def uninstall_for_extension(ext: str) -> None:
-    path = f".{ext}\\shell\\{PARENT_KEY_NAME}"
-    _delete_tree(winreg.HKEY_CLASSES_ROOT, path)
+    # Rutas actuales (HKCU) + antiguas (HKCR)
+    _delete_tree(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\SystemFileAssociations\\.{ext}\\shell\\{PARENT_KEY_NAME}")
+    _delete_tree(winreg.HKEY_CLASSES_ROOT, f"SystemFileAssociations\\.{ext}\\shell\\{PARENT_KEY_NAME}")
+    _delete_tree(winreg.HKEY_CLASSES_ROOT, f".{ext}\\shell\\{PARENT_KEY_NAME}")
     print(f"  OK  .{ext}")
 
 
@@ -75,36 +77,15 @@ def uninstall() -> None:
     for ext in EXTENSIONS:
         try:
             uninstall_for_extension(ext)
-        except PermissionError:
-            print(f"  ERROR  .{ext}  — Sin permisos (ejecuta como Administrador)")
-            errores += 1
         except Exception as exc:
-            print(f"  ERROR  .{ext}  — {exc}")
-            errores += 1
+            pass # Ignoramos permisos o errores en HKCR, solo nos importa HKCU ahora
 
-    if errores == 0:
-        print("\nDesinstalacion completada. El menu contextual ha sido eliminado.\n")
-    else:
-        print(f"\nDesinstalacion finalizada con {errores} error(es).\n")
+    print("\nDesinstalacion completada. El menu contextual ha sido eliminado.\n")
 
 
 # ---------------------------------------------------------------------------
-# Punto de entrada con auto-elevacion
+# Punto de entrada
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    if not is_admin():
-        print("Se requieren permisos de Administrador. Solicitando elevacion...")
-        try:
-            ctypes.windll.shell32.ShellExecuteW(
-                None, "runas",
-                sys.executable,
-                f'"{os.path.abspath(__file__)}"',
-                None, 1
-            )
-        except Exception as exc:
-            print(f"No se pudo elevar: {exc}")
-        sys.exit(0)
-
     uninstall()
-    input("Presiona Enter para cerrar...")

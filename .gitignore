@@ -1,0 +1,32 @@
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Compilacion y empaquetado
+build/
+dist/
+installer/Output/
+installer.iss
+version_info.txt
+
+# IDEs
+.vscode/
+.idea/
+
+# Archivos temporales de SO
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Archivos de configuracion de usuario local
+config.json

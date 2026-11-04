@@ -8,7 +8,9 @@ Uso (ejecutar como Administrador):
     python install_context_menu.py
 
 Qué hace:
-    Escribe entradas en HKEY_CLASSES_ROOT\\<ext>\\shell\\PDFMaster
+    Escribe entradas en HKEY_CLASSES_ROOT\\SystemFileAssociations\\.<ext>\\shell\\PDFMaster
+    (esta ruta funciona aunque otro programa —Acrobat, Nitro— sea el predeterminado;
+    la ruta antigua HKCR\\.<ext>\\shell era ignorada por Windows en ese caso)
     Al hacer clic derecho aparecerá el submenú:
 
         PDF Master >
@@ -33,7 +35,11 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 PYTHON_EXE = sys.executable
 MAIN_PY = os.path.join(ROOT_DIR, "main.py")
 
-CMD_BASE = f'"{PYTHON_EXE}" "{MAIN_PY}"'
+# pythonw.exe = mismo Python pero sin ventana de consola
+_PYTHONW = os.path.join(os.path.dirname(PYTHON_EXE), "pythonw.exe")
+LAUNCH_EXE = _PYTHONW if os.path.isfile(_PYTHONW) else PYTHON_EXE
+
+CMD_BASE = f'"{LAUNCH_EXE}" "{MAIN_PY}"'
 
 # extensión → lista de (etiqueta visible, argumento --tool)
 EXT_MENUS: dict[str, list[tuple[str, str]]] = {
@@ -54,6 +60,13 @@ EXT_MENUS: dict[str, list[tuple[str, str]]] = {
 
 PARENT_LABEL = "PDF Master"
 PARENT_KEY_NAME = "PDFMaster"
+
+# Ruta base donde se registra el menú (relativa a HKEY_CLASSES_ROOT)
+ASSOC_ROOT = "SystemFileAssociations"
+
+# Ícono: usa el de la app si existe, si no el de Python
+_ICON_FILE = os.path.join(ROOT_DIR, "assets", "icon.ico")
+ICON = _ICON_FILE if os.path.isfile(_ICON_FILE) else PYTHON_EXE
 
 
 # ---------------------------------------------------------------------------
@@ -78,17 +91,43 @@ def _set_str(key, name: str, value: str) -> None:
     winreg.SetValueEx(key, name, 0, winreg.REG_SZ, value)
 
 
+def _delete_tree(root, path: str) -> None:
+    """Elimina recursivamente una clave del registro (si existe)."""
+    try:
+        key = winreg.OpenKey(
+            root, path, 0,
+            winreg.KEY_READ | winreg.KEY_WRITE | winreg.KEY_WOW64_64KEY
+        )
+    except FileNotFoundError:
+        return
+    with key:
+        while True:
+            try:
+                sub = winreg.EnumKey(key, 0)
+            except OSError:
+                break
+            _delete_tree(root, f"{path}\\{sub}")
+    parent_path, name = path.rsplit("\\", 1)
+    with winreg.OpenKey(root, parent_path, 0,
+                        winreg.KEY_WRITE | winreg.KEY_WOW64_64KEY) as parent:
+        winreg.DeleteKey(parent, name)
+
+
 # ---------------------------------------------------------------------------
 # Instalación
 # ---------------------------------------------------------------------------
 
 def install_for_extension(ext: str, items: list[tuple[str, str]]) -> None:
-    base_path = f".{ext}\\shell\\{PARENT_KEY_NAME}"
+    # Limpiar la ruta antigua (versiones previas del instalador)
+    _delete_tree(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\.{ext}\\shell\\{PARENT_KEY_NAME}")
 
-    # Nodo padre — etiqueta e ícono
-    with _create_key(winreg.HKEY_CLASSES_ROOT, base_path) as parent:
-        _set_str(parent, "", PARENT_LABEL)
-        _set_str(parent, "Icon", PYTHON_EXE)
+    base_path = f"Software\\Classes\\{ASSOC_ROOT}\\.{ext}\\shell\\{PARENT_KEY_NAME}"
+
+    # Nodo padre — etiqueta e ícono.
+    # Los submenús en cascada requieren MUIVerb (el valor por defecto se ignora).
+    with _create_key(winreg.HKEY_CURRENT_USER, base_path) as parent:
+        _set_str(parent, "MUIVerb", PARENT_LABEL)
+        _set_str(parent, "Icon", ICON)
         _set_str(parent, "SubCommands", "")
 
     # Ítems hijos bajo <base>\shell
@@ -97,10 +136,12 @@ def install_for_extension(ext: str, items: list[tuple[str, str]]) -> None:
         item_id = tool.replace("2", "to")   # img2pdf → imgtopdf (nombre seguro)
         item_path = f"{shell_path}\\{item_id}"
 
-        with _create_key(winreg.HKEY_CLASSES_ROOT, item_path) as item:
+        with _create_key(winreg.HKEY_CURRENT_USER, item_path) as item:
             _set_str(item, "", label)
+            # Sin esto Windows oculta la opción al seleccionar más de 15 archivos
+            _set_str(item, "MultiSelectModel", "Player")
 
-        with _create_key(winreg.HKEY_CLASSES_ROOT, f"{item_path}\\command") as cmd:
+        with _create_key(winreg.HKEY_CURRENT_USER, f"{item_path}\\command") as cmd:
             _set_str(cmd, "", f'{CMD_BASE} --tool {tool} "%1"')
 
     print(f"  OK  .{ext}  ({len(items)} opciones)")
@@ -138,18 +179,4 @@ def install() -> None:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    if not is_admin():
-        print("Se requieren permisos de Administrador. Solicitando elevacion...")
-        try:
-            ctypes.windll.shell32.ShellExecuteW(
-                None, "runas",
-                sys.executable,
-                f'"{os.path.abspath(__file__)}"',
-                None, 1
-            )
-        except Exception as exc:
-            print(f"No se pudo elevar: {exc}")
-        sys.exit(0)
-
     install()
-    input("Presiona Enter para cerrar...")

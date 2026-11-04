@@ -330,10 +330,10 @@ class PdfToImgPanel(QWidget):
         n = len(output_paths)
         folder = os.path.dirname(output_paths[0]) if output_paths else ""
         self._status_lbl.setText(f"{n} imagenes generadas.")
-        QMessageBox.information(
-            self, "Extraccion completada",
-            f"Se generaron {n} imagenes en:\n{folder}",
-        )
+        from ui.components.toast import show_toast, open_in_explorer
+        first = output_paths[0] if output_paths else folder
+        show_toast(self, folder, "success", title=f"Se generaron {n} imágenes",
+                   action_text="Abrir carpeta", action=lambda p=first: open_in_explorer(p))
 
     def _on_error(self, msg: str) -> None:
         self._convert_btn.setEnabled(True)

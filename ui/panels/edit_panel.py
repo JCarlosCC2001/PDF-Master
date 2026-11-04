@@ -508,8 +508,10 @@ class EditPanel(QWidget):
         self._progress.setValue(100)
         self._apply_btn.setEnabled(True)
         self._status_lbl.setText(f"Listo: {os.path.basename(path)}")
-        QMessageBox.information(self, "Edicion completada",
-                                f"PDF guardado correctamente:\n{path}")
+        from ui.components.toast import show_toast
+        from ui.components.preview_dialog import open_preview
+        show_toast(self, path, "success", title="Edición completada",
+                   action_text="Ver PDF", action=lambda p=path: open_preview(p, self))
 
     def _on_error(self, msg: str) -> None:
         self._progress.hide()

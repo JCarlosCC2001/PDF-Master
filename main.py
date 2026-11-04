@@ -49,7 +49,8 @@ def _parse_args() -> tuple[str | None, str | None]:
 def main() -> None:
     app = QApplication(sys.argv)
     app.setApplicationName("PDF Master")
-    app.setApplicationVersion("0.3.0")
+    from version import __version__
+    app.setApplicationVersion(__version__)
     app.setOrganizationName("PDF Master")
 
     font = QFont("Segoe UI", 10)
@@ -57,7 +58,16 @@ def main() -> None:
 
     tool_id, filepath = _parse_args()
 
+    # Una sola ventana: si ya hay una abierta, le enviamos el archivo y salimos
+    from utils.single_instance import acquire_primary, send_to_primary, InstanceServer
+    if not acquire_primary():
+        if send_to_primary(tool_id, filepath):
+            sys.exit(0)
+        # Si la principal no responde, seguimos y abrimos una ventana normal
+
     window = MainWindow(initial_file=filepath, initial_tool=tool_id)
+    server = InstanceServer(app)
+    server.message_received.connect(window.open_external)
     window.show()
 
     sys.exit(app.exec())

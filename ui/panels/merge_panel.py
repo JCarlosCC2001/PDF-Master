@@ -281,10 +281,10 @@ class MergePanel(QWidget):
         self._progress.setValue(100)
         self._merge_btn.setEnabled(True)
         self._status_lbl.setText(f"Listo: {os.path.basename(output_path)}")
-        QMessageBox.information(
-            self, "Union completada",
-            f"PDF unido generado correctamente:\n{output_path}",
-        )
+        from ui.components.toast import show_toast
+        from ui.components.preview_dialog import open_preview
+        show_toast(self, output_path, "success", title="PDFs unidos",
+                   action_text="Ver PDF", action=lambda p=output_path: open_preview(p, self))
 
     def _on_error(self, msg: str) -> None:
         self._merge_btn.setEnabled(True)
